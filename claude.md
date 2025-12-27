@@ -20,7 +20,7 @@ YOLOv7 fast implementation project (Python 3.12).
 ## GitHub
 
 - **使用者名稱**：jimmychintw
-- **遠端倉庫**：https://github.com/jimmychintw/Yolov7fast
+- **遠端倉庫**：https://github.com/jimmychintw/yolov7super
 
 ## Development Setup
 
