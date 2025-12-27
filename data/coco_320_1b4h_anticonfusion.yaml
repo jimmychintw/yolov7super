@@ -1,0 +1,107 @@
+# YOLOv7 1B4H 反混淆分類設定檔
+# 基於 1B1H 500ep 混淆矩陣分析，將高混淆類別分到不同 Head
+# 設計原則：反混淆優先 > 樣本數平衡 > 類別數平衡
+
+# 資料集路徑
+train: ./coco320/images/train2017
+val: ./coco320/images/val2017
+
+# 總類別數
+nc: 80
+
+# 檢測頭數量
+heads: 4
+
+# 分類方式
+grouping: anticonfusion
+
+# 類別名稱 (COCO 80 類，ID 0-79)
+names: [ 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
+         'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+         'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+         'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+         'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+         'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+         'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+         'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+         'hair drier', 'toothbrush' ]
+
+# Head 分配設定
+# 高混淆對已全部分開：car↔truck, cat↔dog, fork↔knife↔spoon, chair↔couch 等
+head_assignments:
+  # Head 0: Person 專用 (1 類)
+  # person 佔 30.5% 樣本 (262,465 bbox)，獨立處理避免壓制其他類別
+  head_0:
+    name: "Person_Specialist"
+    classes: [0]
+    nc: 1
+    sample_count: 262465
+    sample_ratio: 0.305
+    weight: 1.0
+    comment: "person 獨佔，處理 30.5% 樣本"
+
+  # Head 1: 反混淆組 1 (26 類)
+  # 包含: car, motorcycle, airplane, bird, horse, wine glass, spoon, couch 等
+  head_1:
+    name: "AntiConfusion_Group_1"
+    classes: [2, 3, 4, 12, 13, 14, 17, 20, 21, 26, 30, 40, 44, 48, 49, 52, 53, 57, 58, 60, 63, 69, 72, 74, 77, 79]
+    # 2:car, 3:motorcycle, 4:airplane, 12:parking meter, 13:bench, 14:bird,
+    # 17:horse, 20:elephant, 21:bear, 26:handbag, 30:skis, 40:wine glass,
+    # 44:spoon, 48:sandwich, 49:orange, 52:hot dog, 53:pizza, 57:couch,
+    # 58:potted plant, 60:dining table, 63:laptop, 69:oven, 72:refrigerator,
+    # 74:clock, 77:teddy bear, 79:toothbrush
+    nc: 26
+    sample_count: 199806
+    sample_ratio: 0.232
+    weight: 1.0
+
+  # Head 2: 反混淆組 2 (26 類)
+  # 包含: bus, cat, sheep, cup, knife, chair, mouse, cell phone, microwave 等
+  head_2:
+    name: "AntiConfusion_Group_2"
+    classes: [5, 8, 9, 11, 15, 18, 22, 23, 31, 32, 33, 35, 36, 37, 41, 43, 51, 54, 56, 59, 64, 67, 68, 71, 75, 78]
+    # 5:bus, 8:boat, 9:traffic light, 11:stop sign, 15:cat, 18:sheep,
+    # 22:zebra, 23:giraffe, 31:snowboard, 32:sports ball, 33:kite,
+    # 35:baseball glove, 36:skateboard, 37:surfboard, 41:cup, 43:knife,
+    # 51:carrot, 54:donut, 56:chair, 59:bed, 64:mouse, 67:cell phone,
+    # 68:microwave, 71:sink, 75:vase, 78:hair drier
+    nc: 26
+    sample_count: 198854
+    sample_ratio: 0.231
+    weight: 1.0
+
+  # Head 3: 反混淆組 3 (27 類)
+  # 包含: bicycle, truck, dog, cow, fork, apple, remote 等
+  head_3:
+    name: "AntiConfusion_Group_3"
+    classes: [1, 6, 7, 10, 16, 19, 24, 25, 27, 28, 29, 34, 38, 39, 42, 45, 46, 47, 50, 55, 61, 62, 65, 66, 70, 73, 76]
+    # 1:bicycle, 6:train, 7:truck, 10:fire hydrant, 16:dog, 19:cow,
+    # 24:backpack, 25:umbrella, 27:tie, 28:suitcase, 29:frisbee,
+    # 34:baseball bat, 38:tennis racket, 39:bottle, 42:fork, 45:bowl,
+    # 46:banana, 47:apple, 50:broccoli, 55:cake, 61:toilet, 62:tv,
+    # 65:remote, 66:keyboard, 70:toaster, 73:book, 76:scissors
+    nc: 27
+    sample_count: 198876
+    sample_ratio: 0.231
+    weight: 1.0
+
+# 反混淆驗證 (所有高混淆對都已分開)
+# car(H1) ↔ truck(H3) ✓
+# bicycle(H3) ↔ motorcycle(H1) ✓
+# cat(H2) ↔ dog(H3) ✓
+# sheep(H2) ↔ cow(H3) ✓
+# fork(H3) ↔ knife(H2) ✓
+# knife(H2) ↔ spoon(H1) ✓
+# fork(H3) ↔ spoon(H1) ✓
+# wine glass(H1) ↔ cup(H2) ✓
+# apple(H3) ↔ orange(H1) ✓
+# chair(H2) ↔ couch(H1) ✓
+# mouse(H2) ↔ remote(H3) ✓
+# cell phone(H2) ↔ remote(H3) ✓
+# microwave(H2) ↔ oven(H1) ✓
+# skis(H1) ↔ snowboard(H2) ✓
+# backpack(H3) ↔ handbag(H1) ✓
+# bus(H2) ↔ truck(H3) ✓
+# car(H1) ↔ bus(H2) ✓
+# couch(H1) ↔ bed(H2) ✓
+# horse(H1) ↔ cow(H3) ✓

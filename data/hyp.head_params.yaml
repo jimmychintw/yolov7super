@@ -1,0 +1,37 @@
+# Stochastic Class-Aware Augmentation 參數配置
+# 來源: HPO 搜索結果 (2025-12-05)
+# 策略: 根據圖中物體分布，隨機選擇其中一套參數，不做混合
+# 用法: python train.py --class-aware-aug --head-params data/hyp.head_params.yaml
+
+head_0:  # Tall (Vertical) - person, traffic light, fire hydrant, etc.
+  degrees: 2.4246
+  flipud: 0.0114
+  fliplr: 0.3877
+  shear: 0.1397
+  mixup: 0.0316
+
+head_1:  # Square (Central) - bicycle, bench, backpack, etc.
+  degrees: 0.0796
+  flipud: 0.0770
+  fliplr: 0.2581
+  shear: 1.6101
+  mixup: 0.1749
+
+head_2:  # Square (Central) - car, dog, chair, etc.
+  degrees: 0.8416
+  flipud: 0.0258
+  fliplr: 0.2318
+  shear: 0.1311
+  mixup: 0.0948
+
+head_3:  # Wide (Horizontal) - airplane, bus, train, etc.
+  degrees: 0.0677
+  flipud: 0.0395
+  fliplr: 0.1938
+  shear: 3.0063
+  mixup: 0.0127
+
+# Dynamic Label Filtering 設定 (可選功能)
+label_filtering:
+  enabled: false  # 預設關閉
+  rotation_threshold: 5.0  # 旋轉超過此角度時過濾非主導 Head 標籤
